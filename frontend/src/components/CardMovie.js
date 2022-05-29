@@ -3,6 +3,10 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useDispatch } from "react-redux";
 import { setCurrentMovie } from "../redux/currentMovieSelectedSlice";
+import {
+  addFavoriteMovie,
+  removeFavoriteMovie,
+} from "../redux/favoriteMoviesSlice";
 
 function CardMovie({ item }) {
   const [isSelected, setIsSelected] = useState(false);
@@ -20,6 +24,9 @@ function CardMovie({ item }) {
         style={styles.addToFavoritesBtn}
         onPress={() => {
           setIsSelected(!isSelected);
+          !isSelected
+            ? dispatch(addFavoriteMovie(item))
+            : dispatch(removeFavoriteMovie(item));
         }}
       >
         <Ionicons

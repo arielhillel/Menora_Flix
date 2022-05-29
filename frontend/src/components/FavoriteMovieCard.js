@@ -1,20 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
 import { useSelector } from "react-redux";
 
-function MovieDescription() {
-  let item = useSelector((state) => state.reducerCurrentMovieSelected.movie);
-  let recommendedMovies = useSelector(
-    (state) => state.reducerMovies.movies.recommendedMovies
-  );
-  let [movie, setMovie] = useState();
-  useEffect(() => {
-    if (item.id === undefined || item.id === null) {
-      setMovie(recommendedMovies[0]);
-    } else {
-      setMovie(item);
-    }
-  }, [item, recommendedMovies]);
+function FavoriteMovieCard({ movie }) {
   return movie ? (
     <View style={styles.container}>
       <View style={{ flex: 1, alignItems: "center" }}>
@@ -41,13 +29,10 @@ function MovieDescription() {
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    justifyContent: "space-around",
-    alignItems: "center",
     flex: 1,
-    padding: 0,
-    margin: 0,
     flexDirection: "row",
+    paddingTop: 20,
+    paddingBottom: 20,
     minHeight: 275,
   },
   image: {
@@ -56,16 +41,16 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   text: {
-    fontSize: 18,
+    fontSize: 20,
     color: "#fff",
   },
   title: {
+    paddingBottom: 60,
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 20,
   },
 });
 
-export default MovieDescription;
+export default FavoriteMovieCard;

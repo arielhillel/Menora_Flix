@@ -13,13 +13,12 @@ export default function index() {
     colors: {
       ...DefaultTheme.colors,
       primary: "red",
-      accent: "#f1c40f",
     },
   };
   return (
     <Provider store={store}>
       <PaperProvider theme={theme}>
-        <StatusBar style="auto" />
+        <StatusBar style="light" />
         <App />
       </PaperProvider>
     </Provider>

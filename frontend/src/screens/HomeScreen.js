@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Appbar } from "react-native-paper";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
 import CarouselMovies from "../components/CarouselMovies";
 import MovieDescription from "../components/MovieDescription";
 import { setCurrentMovie } from "../redux/currentMovieSelectedSlice";
+import axios from "axios";
+import { loadNewMovies, loadRecommendedMovies } from "../redux/moviesSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 function HomeScreen() {
-  const [newestMovies, setNewestMovies] = useState();
-  const [recommendedMovies, setRecommendedMovies] = useState();
   let userDetails = useSelector(
     (state) => state.reducerUserDetails.userDetails
   );
-
+  let recommendedMovies = useSelector(
+    (state) => state.reducerMovies.movies.recommendedMovies
+  );
+  let newestMovies = useSelector(
+    (state) => state.reducerMovies.movies.newMovies
+  );
   const dispatch = useDispatch();
 
   const handleSetNewestMovies = async () => {
@@ -21,7 +25,7 @@ function HomeScreen() {
       "https://menora-flix.herokuapp.com/movies/newest",
       { headers: { authorization: `Bearer ${userDetails.accessToken}` } }
     );
-    result && setNewestMovies(result.data.newestMovies);
+    result && dispatch(loadNewMovies(result.data.newestMovies));
   };
 
   const handleSetRecommendedMovies = async () => {
@@ -29,38 +33,34 @@ function HomeScreen() {
       "https://menora-flix.herokuapp.com/movies/recommended",
       { headers: { authorization: `Bearer ${userDetails.accessToken}` } }
     );
-    result && setRecommendedMovies(result.data.recommendedMovies);
+    result && dispatch(loadRecommendedMovies(result.data.recommendedMovies));
   };
-
-  const _handleSearch = () => console.log("Searching");
 
   useEffect(() => {
     async function fetchData() {
       await handleSetNewestMovies();
       await handleSetRecommendedMovies();
-      recommendedMovies &&
-        dispatch(
-          setCurrentMovie(recommendedMovies[recommendedMovies.length - 1])
-        );
     }
     fetchData();
   }, []);
 
+  const _handleSearch = () => console.log("Searching");
+
   return (
-    <>
-      <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <View>
         <Appbar.Header>
           <Appbar.Content title="My home" />
           <Appbar.Action icon="magnify" onPress={_handleSearch} />
         </Appbar.Header>
         <Text style={styles.text}>Recommended Movies</Text>
-        <CarouselMovies movies={recommendedMovies ? recommendedMovies : []} />
+        <CarouselMovies movies={recommendedMovies} />
         <Text style={styles.text}>Movie Description</Text>
         <MovieDescription />
         <Text style={styles.text}>New Movies</Text>
-        <CarouselMovies movies={newestMovies ? newestMovies : []} />
+        <CarouselMovies movies={newestMovies} />
       </View>
-    </>
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
@@ -71,9 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   text: {
-    paddingTop: 20,
-    paddingBottom: 5,
-    paddingLeft: 10,
+    padding: 15,
     fontSize: 22,
     color: "#fff",
   },
