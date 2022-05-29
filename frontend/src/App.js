@@ -1,15 +1,19 @@
-import { SafeAreaView } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import LoginScreen from "./screens/LoginScreen";
-import { Provider } from "react-redux";
-import store from "./redux/redux";
+import { NavigationContainer } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import DrawerNavigation from "./navigation/DrawerNavigation";
+
 export default function App() {
+  const isLogin = useSelector((state) => state.reducerIsLogin.isLogin);
   return (
-    <Provider store={store}>
-      <SafeAreaView>
-        <StatusBar style="auto" />
+    <>
+      {isLogin ? (
+        <NavigationContainer>
+          <DrawerNavigation />
+        </NavigationContainer>
+      ) : (
         <LoginScreen />
-      </SafeAreaView>
-    </Provider>
+      )}
+    </>
   );
 }

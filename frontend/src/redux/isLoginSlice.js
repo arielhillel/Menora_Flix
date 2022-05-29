@@ -6,15 +6,15 @@ const isLoginSlice = createSlice({
     isLogin: false,
   },
   reducers: {
-    login: (state, action) => {
+    setIsLogin: (state) => {
       state.isLogin = true;
     },
-    logout: (state, action) => {
+    setIsLogout: (state) => {
       state.isLogin = false;
     },
   },
 });
 
-export const { login, logout } = isLoginSlice.actions;
+export const { setIsLogin, setIsLogout } = isLoginSlice.actions;
 
 export default isLoginSlice.reducer;

@@ -8,18 +8,17 @@ const userDetailsSlice = createSlice({
   reducers: {
     setuserDetails: (state, action) => {
       state.userDetails = {
-        userName: action.userName,
-        password: action.password,
-        accessToken: action.accessToken,
+        userName: action.payload.userName,
+        password: action.payload.password,
+        accessToken: action.payload.accessToken,
       };
     },
-    ResetuserDetails: (state, action) => {
+    resetuserDetails: (state) => {
       state.userDetails = {};
     },
   },
 });
 
-export const { logsetuserDetailsin, ResetuserDetails } =
-  userDetailsSlice.actions;
+export const { setuserDetails, resetuserDetails } = userDetailsSlice.actions;
 
 export default userDetailsSlice.reducer;

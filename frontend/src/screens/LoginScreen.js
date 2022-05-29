@@ -8,30 +8,51 @@ import {
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setuserDetails } from "../redux/userDetailsSlice";
+import { setIsLogin } from "../redux/isLoginSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
-  let [userName, setUserName] = useState();
-  let [userNameErrorMessage, setUserNameErrorMessage] = useState("");
-  let [password, setPassword] = useState();
-  let [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  let [serverMessage, setServerMessage] = useState("");
-  let [validUserName, setValidUserName] = useState(false);
-  let [validPassword, setValidPassword] = useState(false);
+  const [userName, setUserName] = useState();
+  const [userNameErrorMessage, setUserNameErrorMessage] = useState("");
+  const [password, setPassword] = useState();
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
+  const [serverMessage, setServerMessage] = useState("");
+  const [validUserName, setValidUserName] = useState(false);
+  const [validPassword, setValidPassword] = useState(false);
+  const [isSignedUp, setIsSignedUp] = useState("false");
 
-  const isLogin = useSelector((state) => state.reducerIsLogin.isLogin);
+  const getisSignedUp = async () => {
+    try {
+      const value = await AsyncStorage.getItem("isSignUp");
+      if (value !== null) {
+        setIsSignedUp(value);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-  useEffect(() => {
-    setUserName("");
-    setPassword("");
-  }, []);
+  // clearAsyncStorage = async () => {
+  //   try {
+  //     await AsyncStorage.clear();
+  //   } catch (e) {
+  //     // clear error
+  //   }
 
-  validateUsername = (username) => {
-    if (username === "") {
+  //   console.log("Done.");
+  // };
+
+  const dispatch = useDispatch();
+
+  validateUsername = (usernameToValidate) => {
+    if (usernameToValidate === "") {
       setUserNameErrorMessage("Username is required!");
+      setValidUserName(false);
     } else {
-      const re = /^[A-Za-z][A-Za-z]{8,}$/;
-      if (re.test(username)) {
+      const re = /^(?=.*[A-Za-z])[A-Za-z]{8,}$/;
+      if (re.test(usernameToValidate)) {
         setValidUserName(true);
         setUserNameErrorMessage("");
       } else {
@@ -42,54 +63,96 @@ export default function LoginScreen() {
       }
     }
   };
-  validatePassword = (password) => {
-    if (password === "") {
+  validatePassword = (passwordToValidate) => {
+    if (passwordToValidate === "") {
       setPasswordErrorMessage("Password is required!");
+      setValidPassword(false);
     } else {
       const re =
         /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
-      if (re.test(password)) {
+      if (re.test(passwordToValidate)) {
         setValidPassword(true);
         setPasswordErrorMessage("");
-      } else
+      } else {
         setPasswordErrorMessage(
           "The Password must contain at least 6 characters (at least 1 uppercase or lowercase letter, 1 number and 1 special symbol)."
         );
-      setValidPassword(false);
+        setValidPassword(false);
+      }
     }
   };
 
-  login = async (username, password) => {
-    const url = "";
+  login = async (usernameToLogin, passwordToLogin) => {
+    const url = `https://menora-flix.herokuapp.com/login`;
     try {
-      axios.post(
+      let response = await axios.post(
         url,
-        JSON.stringify({ username: username, password: password }),
+        JSON.stringify({
+          username: usernameToLogin,
+          password: passwordToLogin,
+        }),
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       );
       const accessToken = response?.data?.accessToken;
-      //setAuth({ userName, password, accessToken });
+      dispatch(setuserDetails({ userName, password, accessToken }));
       setServerMessage("You Logged In Successfully");
-      //setSuccess(true);
+      dispatch(setIsLogin());
     } catch (err) {
       if (!err?.response) {
         setServerMessage("No Server Response");
-        //setSuccess(false);
       } else if (err.response?.status === 400) {
-        setServerMessage("Missing Email or Password");
-        //setSuccess(false);
+        setServerMessage("Re-enter username and password");
       } else if (err.response?.status === 401) {
         setServerMessage("Unauthorized");
-        //setSuccess(false);
       } else {
         setServerMessage("Login Failed");
-        //setSuccess(false);
       }
     }
   };
+
+  Signup = async (usernameToSignup, passwordToSignup) => {
+    const url = `https://menora-flix.herokuapp.com/signup`;
+    try {
+      let response = await axios.post(
+        url,
+        JSON.stringify({
+          username: usernameToSignup,
+          password: passwordToSignup,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      setServerMessage("You Signed Up Successfully");
+      try {
+        await AsyncStorage.setItem("isSignUp", "true");
+        await setIsSignedUp("true");
+      } catch (e) {
+        console.log(e);
+      }
+    } catch (err) {
+      if (!err?.response) {
+        setServerMessage("No Server Response");
+      } else if (err.response?.status === 400) {
+        setServerMessage("Re-enter username and password");
+      } else if (err.response?.status === 409) {
+        setServerMessage("Existing Username");
+      } else {
+        setServerMessage("Signup Failed");
+      }
+    }
+  };
+
+  useEffect(() => {
+    setUserName("");
+    setPassword("");
+    getisSignedUp();
+  }, [isSignedUp]);
+
   return (
     <>
       <ImageBackground
@@ -101,12 +164,15 @@ export default function LoginScreen() {
 
         <View style={styles.container}>
           <Text style={styles.logo}>Menora Flix</Text>
-          <Text style={styles.login_title}> Login</Text>
+          <Text style={styles.login_title}>
+            {isSignedUp === "true" ? "Login" : "Sign up"}
+          </Text>
 
           <View style={styles.username_input}>
             <TextInput
-              onChangeText={(username) => {
-                setUserName(username);
+              onChangeText={(usernameFromInput) => {
+                setUserName(usernameFromInput);
+                validateUsername(usernameFromInput);
               }}
               style={styles.username_input_text}
               autoFocus={true}
@@ -121,8 +187,9 @@ export default function LoginScreen() {
 
           <View style={styles.password_input}>
             <TextInput
-              onChangeText={(password) => {
-                setPassword(password);
+              onChangeText={(passwordFromInput) => {
+                setPassword(passwordFromInput);
+                validatePassword(passwordFromInput);
               }}
               style={styles.password_input_text}
               color="#fff"
@@ -135,15 +202,19 @@ export default function LoginScreen() {
             </Text>
           </View>
           <TouchableOpacity
-            onPress={async () => {
-              validateUsername(userName);
-              validatePassword(password);
-
-              validUserName && validPassword && login(userName, password);
+            onPress={() => {
+              setServerMessage("");
+              validPassword && validUserName
+                ? isSignedUp === "true"
+                  ? login(userName, password)
+                  : Signup(userName, password)
+                : setServerMessage("Enter Username and password!");
             }}
           >
             <View style={styles.login_button}>
-              <Text style={styles.login_button_text}>Login</Text>
+              <Text style={styles.login_button_text}>
+                {isSignedUp === "true" ? "Login" : "Sign Up"}
+              </Text>
             </View>
           </TouchableOpacity>
 
