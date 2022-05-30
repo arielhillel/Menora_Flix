@@ -1,6 +1,5 @@
 import React from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
-import { useSelector } from "react-redux";
 
 function FavoriteMovieCard({ movie }) {
   return movie ? (
@@ -33,7 +32,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingTop: 20,
     paddingBottom: 20,
-    minHeight: 275,
   },
   image: {
     width: "100%",

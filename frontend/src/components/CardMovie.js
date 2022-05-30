@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCurrentMovie } from "../redux/currentMovieSelectedSlice";
 import {
   addFavoriteMovie,
   removeFavoriteMovie,
 } from "../redux/favoriteMoviesSlice";
+import { addFavorite, removeFavorite } from "../redux/countNewFavoritesSlice";
 
 function CardMovie({ item }) {
   const [isSelected, setIsSelected] = useState(false);
@@ -22,11 +23,11 @@ function CardMovie({ item }) {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.addToFavoritesBtn}
-        onPress={() => {
+        onPress={async () => {
           setIsSelected(!isSelected);
           !isSelected
-            ? dispatch(addFavoriteMovie(item))
-            : dispatch(removeFavoriteMovie(item));
+            ? dispatch(addFavoriteMovie(item)) && dispatch(addFavorite())
+            : dispatch(removeFavoriteMovie(item)) && dispatch(removeFavorite());
         }}
       >
         <Ionicons
