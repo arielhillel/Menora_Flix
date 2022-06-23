@@ -1,2 +1,2 @@
-# Menora_Flix
+# ReactNative_Flix
 
